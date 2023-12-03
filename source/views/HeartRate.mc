@@ -11,10 +11,16 @@ class HeartRateView extends BaseView {
   }
 
   private function getHeartRateText() as String {
-    var heartRateHistory = ActivityMonitor.getHeartRateHistory(null, false);
-    var heartRate = heartRateHistory.next().heartRate;
+    var heartRateHistory = ActivityMonitor.getHeartRateHistory(1, true);
+    var heartRateSample = heartRateHistory.next();
 
-    if (heartRate == ActivityMonitor.INVALID_HR_SAMPLE) {
+    if (heartRateSample == null) {
+      return "-";
+    }
+
+    var heartRate = heartRateSample.heartRate;
+
+    if (heartRate == ActivityMonitor.INVALID_HR_SAMPLE || heartRate == null) {
       return "-";
     }
 

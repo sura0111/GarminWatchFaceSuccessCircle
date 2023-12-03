@@ -79,6 +79,7 @@ class MainWatchFace extends WatchUi.WatchFace {
   public function onUpdate(dc as Dc) as Void {
     // Call the parent onUpdate function to redraw the layout
     View.onUpdate(dc);
+    var clockTime = System.getClockTime();
     var centerX = self.getCenterX();
     var centerY = self.getCenterY();
 
@@ -92,7 +93,7 @@ class MainWatchFace extends WatchUi.WatchFace {
     self.isDoNotDisturb = settings.doNotDisturb;
     var info = ActivityMonitor.getInfo();
     var weather = Weather.getCurrentConditions();
-    var time = self.getTimeText();
+    var time = self.getTimeText(clockTime);
     var date = self.getDateText();
     var step = self.getStepText(info);
     var temperature = self.getTemperatureText(weather);
@@ -140,6 +141,15 @@ class MainWatchFace extends WatchUi.WatchFace {
     self.battery.draw(dc);
     self.heartRate.draw(dc);
     self.energyBar.draw(dc);
+
+    dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
+    dc.drawText(
+      centerX + 160,
+      centerY - 10,
+      Graphics.FONT_XTINY,
+      clockTime.sec.format("%02d"),
+      Graphics.TEXT_JUSTIFY_LEFT
+    );
   }
 
   // Called when this View is removed from the screen. Save the
@@ -162,8 +172,7 @@ class MainWatchFace extends WatchUi.WatchFace {
     return self.screenHeight / 2;
   }
 
-  private function getTimeText() as String {
-    var clockTime = System.getClockTime();
+  private function getTimeText(clockTime as System.ClockTime) as String {
     var hour = self.is24Hour ? clockTime.hour : (clockTime.hour % 12 == 0 ? 12 : clockTime.hour % 12);
     var ampm = self.is24Hour ? "" : (clockTime.hour >= 12 && clockTime.hour < 24 ? " PM" : " AM");
     var timeText = Lang.format("$1$:$2$$3$", [hour.format("%02d"), clockTime.min.format("%02d"), ampm]);
