@@ -121,15 +121,26 @@ class MainWatchFace extends WatchUi.WatchFace {
     // Date
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.drawText(centerX, centerY - 54 - 40, Graphics.FONT_XTINY, date, Graphics.TEXT_JUSTIFY_CENTER);
+    
     if (self.isDoNotDisturb) {
       dc.drawBitmap(centerX - 12, centerY - 54 - 12 - 72, self.iconDoNotDisturb);
     }
+
     // Time
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.drawText(centerX, centerY - 67, Graphics.FONT_NUMBER_HOT, time, Graphics.TEXT_JUSTIFY_CENTER);
+    dc.drawText(
+      centerX + 160,
+      centerY - 10,
+      Graphics.FONT_XTINY,
+      clockTime.sec.format("%02d"),
+      Graphics.TEXT_JUSTIFY_LEFT
+    );
+
     // Temperature
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.drawText(centerX, 20, Graphics.FONT_XTINY, temperature, Graphics.TEXT_JUSTIFY_CENTER);
+
     // Separators
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.setPenWidth(2);
@@ -141,15 +152,6 @@ class MainWatchFace extends WatchUi.WatchFace {
     self.battery.draw(dc);
     self.heartRate.draw(dc);
     self.energyBar.draw(dc);
-
-    dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.drawText(
-      centerX + 160,
-      centerY - 10,
-      Graphics.FONT_XTINY,
-      clockTime.sec.format("%02d"),
-      Graphics.TEXT_JUSTIFY_LEFT
-    );
   }
 
   // Called when this View is removed from the screen. Save the
@@ -180,27 +182,12 @@ class MainWatchFace extends WatchUi.WatchFace {
     return timeText;
   }
 
-  private function getHeartRateText() as String {
-    var heartRateHistory = ActivityMonitor.getHeartRateHistory(null, false);
-    var heartRate = heartRateHistory.next().heartRate;
-
-    if (heartRate == ActivityMonitor.INVALID_HR_SAMPLE) {
-      return "-";
-    }
-
-    return heartRate.format("%d");
-  }
-
   private function getDateText() as String {
     var now = Time.now();
     var date = Date.info(now, Time.FORMAT_LONG);
     var dateText = Lang.format("$1$ $2$ ($3$)", [ date.month, date.day, date.day_of_week ]);
 
     return dateText;
-  }
-
-  private function getBatteryText(systemStats as System.Stats) as String {
-    return systemStats.battery.format("%d") + "%";
   }
 
   private function getStepText(info as ActivityMonitor.Info) as String {
