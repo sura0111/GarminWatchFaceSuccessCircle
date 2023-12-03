@@ -16,6 +16,11 @@ class MainWatchFace extends WatchUi.WatchFace {
   var heartRate as HeartRateView;
   var energyBar as ArcGoalView;
 
+  var is24Hour as Boolean = false;
+  var isDoNotDisturb as Boolean = false;
+
+  var iconDoNotDisturb as BitmapResource;
+
   public function initialize() {
     WatchFace.initialize();
 
@@ -32,6 +37,8 @@ class MainWatchFace extends WatchUi.WatchFace {
 
     self.battery = new Battery({});
     self.heartRate = new HeartRateView();
+    
+    self.iconDoNotDisturb = WatchUi.loadResource(Rez.Drawables.doNotDisturbIcon);
   }
 
   // Load your resources here
@@ -46,9 +53,11 @@ class MainWatchFace extends WatchUi.WatchFace {
 
     self.stepBar.setPosition({ :x => screenCenterX, :y => screenCenterY });
     self.stepBar.setRadius(arcRadius);
+    self.stepBar.setIcon(WatchUi.loadResource(Rez.Drawables.stepIcon));
 
     self.energyBar.setPosition({ :x => screenCenterX, :y => screenCenterY });
     self.energyBar.setRadius(arcRadius);
+    self.energyBar.setIcon(WatchUi.loadResource(Rez.Drawables.bodyBatteryIcon));
 
     self.heartRate.setPosition({
       :x => screenCenterX - 120,
@@ -78,6 +87,9 @@ class MainWatchFace extends WatchUi.WatchFace {
      * Get Info
      * ------------------------
      */
+    var settings = System.getDeviceSettings();
+    self.is24Hour = settings.is24Hour;
+    self.isDoNotDisturb = settings.doNotDisturb;
     var info = ActivityMonitor.getInfo();
     var weather = Weather.getCurrentConditions();
     var time = self.getTimeText();
@@ -108,6 +120,9 @@ class MainWatchFace extends WatchUi.WatchFace {
     // Date
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.drawText(centerX, centerY - 54 - 40, Graphics.FONT_XTINY, date, Graphics.TEXT_JUSTIFY_CENTER);
+    if (self.isDoNotDisturb) {
+      dc.drawBitmap(centerX - 12, centerY - 54 - 12 - 72, self.iconDoNotDisturb);
+    }
     // Time
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.drawText(centerX, centerY - 67, Graphics.FONT_NUMBER_HOT, time, Graphics.TEXT_JUSTIFY_CENTER);
@@ -149,7 +164,9 @@ class MainWatchFace extends WatchUi.WatchFace {
 
   private function getTimeText() as String {
     var clockTime = System.getClockTime();
-    var timeText = Lang.format("$1$:$2$", [ clockTime.hour.format("%02d"), clockTime.min.format("%02d") ]);
+    var hour = self.is24Hour ? clockTime.hour : (clockTime.hour % 12 == 0 ? 12 : clockTime.hour % 12);
+    var ampm = self.is24Hour ? "" : (clockTime.hour >= 12 && clockTime.hour < 24 ? " PM" : " AM");
+    var timeText = Lang.format("$1$:$2$$3$", [hour.format("%02d"), clockTime.min.format("%02d"), ampm]);
 
     return timeText;
   }
@@ -185,12 +202,32 @@ class MainWatchFace extends WatchUi.WatchFace {
     return currentCondition == null ? "~°C" : currentCondition.temperature.format("%d") + "°C";
   }
 
-  function getBodyBattery() as Number {
-    var bodyBattery = SensorHistory.getBodyBatteryHistory({ :period => 1 });
-    var bodyBatteryData = bodyBattery.next().data;
+  private function getBodyBatteryHistoryIterator() as SensorHistory.SensorHistoryIterator or Null {
+    if ((Toybox has :SensorHistory) && (Toybox.SensorHistory has :getBodyBatteryHistory)) {
+        // Set up the method with parameters
+        return Toybox.SensorHistory.getBodyBatteryHistory({ :period => 1 });
+    }
+    return null;
+  }
+
+  private function getBodyBattery() as Number {
+    var bodyBatteryHistory = self.getBodyBatteryHistoryIterator();
+    if (bodyBatteryHistory == null) {
+      return 0;
+    }
+
+    var bodyBatterySample = bodyBatteryHistory.next();
+    
+    if (bodyBatterySample == null) {
+      return 0;
+    }
+
+    var bodyBatteryData = bodyBatterySample.data;
+
     if (bodyBatteryData != null) {
       return bodyBatteryData;
     }
+
     return 0;
   }
 }

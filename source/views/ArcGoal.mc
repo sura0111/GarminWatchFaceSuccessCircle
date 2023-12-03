@@ -1,10 +1,12 @@
 import Toybox.Graphics;
 import Toybox.Math;
 import Toybox.Lang;
+import Toybox.WatchUi;
 
 class ArcGoalView extends ArcGoalGraph {
   var textColor = Graphics.COLOR_LT_GRAY;
   var text = "";
+  var icon = null;
 
   function initialize(params) {
     ArcGoalGraph.initialize(params);
@@ -12,15 +14,27 @@ class ArcGoalView extends ArcGoalGraph {
 
   function draw(dc as Dc) {
     ArcGoalGraph.draw(dc);
-    var tX = (Math.cos(Math.PI / 180 * (self.getCenterDegree())) * self.radius).toNumber() + self.getTextOffsetX();
-    var tY = - (Math.sin(Math.PI / 180 * (self.getCenterDegree())) * self.radius).toNumber() + self.getTextOffsetY();
-
-    System.println(self.getCenterDegree() + "," + tX + "," + tY + "," + self.position);
-
+    var tX = (Math.cos(Math.PI / 180 * (self.getCenterDegree())) * self.radius).toNumber();
+    var tY = - (Math.sin(Math.PI / 180 * (self.getCenterDegree())) * self.radius).toNumber();
 
     if (self.text) {
       dc.setColor(self.textColor, Graphics.COLOR_TRANSPARENT);
-      dc.drawText(tX + self.x, tY + self.y, Graphics.FONT_XTINY, self.text, self.getTextJustify());
+      dc.drawText(
+        tX + self.x + self.getTextOffsetX(),
+        tY + self.y + self.getTextOffsetY(),
+        Graphics.FONT_XTINY,
+        self.text,
+        self.getTextJustify()
+      );
+
+      System.println(self.icon);
+      if (self.icon) {
+        dc.drawBitmap(
+          tX + self.x + self.getIconOffsetX(),
+          tY + self.y + self.getIconOffsetY(),
+          self.icon
+        );
+      }
     }
   }
 
@@ -30,6 +44,10 @@ class ArcGoalView extends ArcGoalGraph {
 
   function setText(text as String) {
     self.text = text;
+  }
+
+  function setIcon(icon as BitmapResource) {
+    self.icon = icon;
   }
 
   function getTextJustify() {
@@ -59,6 +77,26 @@ class ArcGoalView extends ArcGoalGraph {
       case "right": return -8;
       case "bottom": return -48;
       default: return -48;
+    }
+  }
+
+  function getIconOffsetX() {
+     switch (self.position) {
+      case "left": return 16;
+      case "top": return -12;
+      case "right": return 0;
+      case "bottom": return -12;
+      default: return 0;
+    }
+  }
+
+  function getIconOffsetY() {
+     switch (self.position) {
+      case "left": return -36;
+      case "top": return 0;
+      case "right": return -8;
+      case "bottom": return -74;
+      default: return -100;
     }
   }
 }

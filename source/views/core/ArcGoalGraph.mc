@@ -76,8 +76,6 @@ class ArcGoalGraph extends BaseView {
 
     dc.setColor(self.color, self.color);
 
-    System.println("start " + self.value + ", current " + self.goal);
-
     var currentDegree = self.getCurrentDegree();
     var circleDotRadius = 3;
 
