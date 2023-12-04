@@ -27,7 +27,6 @@ class ArcGoalView extends ArcGoalGraph {
         self.getTextJustify()
       );
 
-      System.println(self.icon);
       if (self.icon) {
         dc.drawBitmap(
           tX + self.x + self.getIconOffsetX(),

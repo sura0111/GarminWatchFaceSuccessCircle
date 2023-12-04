@@ -14,12 +14,13 @@ class MainWatchFace extends WatchUi.WatchFace {
   var stepBar as ArcGoalView;
   var battery as Battery;
   var heartRate as HeartRateView;
-  var energyBar as ArcGoalView;
+  var bodyBatteryBar as ArcGoalView;
 
   var is24Hour as Boolean = false;
   var isDoNotDisturb as Boolean = false;
 
   var iconDoNotDisturb as BitmapResource;
+  var offsetX = 20;
 
   public function initialize() {
     WatchFace.initialize();
@@ -29,7 +30,7 @@ class MainWatchFace extends WatchUi.WatchFace {
       :position => "bottom",
     });
   
-    self.energyBar = new ArcGoalView({
+    self.bodyBatteryBar = new ArcGoalView({
       :direction => Graphics.ARC_CLOCKWISE,
       :color => Graphics.COLOR_DK_BLUE,
       :position => "left",
@@ -49,15 +50,15 @@ class MainWatchFace extends WatchUi.WatchFace {
     self.screenHeight = dc.getHeight();
     var screenCenterX = self.getCenterX();
     var screenCenterY = self.getCenterY();
-    var arcRadius = (self.screenWidth > self.screenHeight ? screenCenterY : screenCenterX) - 4;
+    var arcRadius = (self.screenWidth > self.screenHeight ? screenCenterY : screenCenterX) - 8;
 
     self.stepBar.setPosition({ :x => screenCenterX, :y => screenCenterY });
     self.stepBar.setRadius(arcRadius);
     self.stepBar.setIcon(WatchUi.loadResource(Rez.Drawables.stepIcon));
 
-    self.energyBar.setPosition({ :x => screenCenterX, :y => screenCenterY });
-    self.energyBar.setRadius(arcRadius);
-    self.energyBar.setIcon(WatchUi.loadResource(Rez.Drawables.bodyBatteryIcon));
+    self.bodyBatteryBar.setPosition({ :x => screenCenterX, :y => screenCenterY });
+    self.bodyBatteryBar.setRadius(arcRadius);
+    self.bodyBatteryBar.setIcon(WatchUi.loadResource(Rez.Drawables.bodyBatteryIcon));
 
     self.heartRate.setPosition({
       :x => screenCenterX - 120,
@@ -109,9 +110,9 @@ class MainWatchFace extends WatchUi.WatchFace {
     self.stepBar.setData({ :value => info.steps, :goal => info.stepGoal });
     self.stepBar.setText(step);
 
-    // Energy
-    self.energyBar.setData({ :value => bodyBattery, :goal => 100 });
-    self.energyBar.setText(bodyBattery.format("%d") + "%");
+    // bodyBattery
+    self.bodyBatteryBar.setData({ :value => bodyBattery, :goal => 100 });
+    self.bodyBatteryBar.setText(bodyBattery.format("%d") + "%");
 
     /**
      * ------------------------
@@ -123,18 +124,25 @@ class MainWatchFace extends WatchUi.WatchFace {
     dc.drawText(centerX, centerY - 54 - 40, Graphics.FONT_XTINY, date, Graphics.TEXT_JUSTIFY_CENTER);
     
     if (self.isDoNotDisturb) {
-      dc.drawBitmap(centerX - 12, centerY - 54 - 12 - 72, self.iconDoNotDisturb);
+      dc.drawBitmap(centerX + - 12, centerY - 54 - 12 - 72, self.iconDoNotDisturb);
     }
 
     // Time
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.drawText(centerX, centerY - 67, Graphics.FONT_NUMBER_HOT, time, Graphics.TEXT_JUSTIFY_CENTER);
+    dc.drawText(centerX + offsetX, centerY - 67, Graphics.FONT_NUMBER_HOT, time, Graphics.TEXT_JUSTIFY_CENTER);
     dc.drawText(
-      centerX + 160,
+      centerX + offsetX + 150,
       centerY - 10,
       Graphics.FONT_XTINY,
       clockTime.sec.format("%02d"),
       Graphics.TEXT_JUSTIFY_LEFT
+    );
+
+
+    dc.fillCircle(
+      centerX + (centerX - 2) * Math.cos(clockTime.sec * Math.PI / 30 - Math.PI / 2), 
+      centerY + (centerY - 2) * Math.sin(clockTime.sec * Math.PI / 30 - Math.PI / 2),
+      3
     );
 
     // Temperature
@@ -144,14 +152,14 @@ class MainWatchFace extends WatchUi.WatchFace {
     // Separators
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.setPenWidth(2);
-    dc.drawLine(centerX - 150, centerY - 54, centerX + 150, centerY - 54);
-    dc.drawLine(centerX - 150, centerY + 54, centerX + 150, centerY + 54);
+    dc.drawLine(centerX + offsetX - 150, centerY - 54, centerX + offsetX + 150, centerY - 54);
+    dc.drawLine(centerX + offsetX - 150, centerY + 54, centerX + offsetX + 150, centerY + 54);
     dc.setPenWidth(1);
 
     self.stepBar.draw(dc);
     self.battery.draw(dc);
     self.heartRate.draw(dc);
-    self.energyBar.draw(dc);
+    self.bodyBatteryBar.draw(dc);
   }
 
   // Called when this View is removed from the screen. Save the

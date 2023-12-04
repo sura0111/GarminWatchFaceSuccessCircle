@@ -11,17 +11,21 @@ class HeartRateView extends BaseView {
   }
 
   private function getHeartRateText() as String {
-    var heartRateHistory = ActivityMonitor.getHeartRateHistory(1, true);
-    var heartRateSample = heartRateHistory.next();
+    var heartRate = Activity.getActivityInfo().currentHeartRate;
 
-    if (heartRateSample == null) {
-      return "-";
-    }
+    if ((heartRate == null || heartRate == ActivityMonitor.INVALID_HR_SAMPLE) && ActivityMonitor has :getHeartRateHistory) {
+      var heartRateHistory = ActivityMonitor.getHeartRateHistory(1, true);
+      var heartRateSample = heartRateHistory.next();
 
-    var heartRate = heartRateSample.heartRate;
+      if (heartRateSample == null) {
+        return "-";
+      }
 
-    if (heartRate == ActivityMonitor.INVALID_HR_SAMPLE || heartRate == null) {
-      return "-";
+      heartRate = heartRateSample.heartRate;
+
+      if (heartRate == ActivityMonitor.INVALID_HR_SAMPLE || heartRate == null) {
+        return "-";
+      }
     }
 
     return StringHelpers.padStart(heartRate.format("%d"), 3, " ");
