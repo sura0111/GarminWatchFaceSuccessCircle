@@ -63,7 +63,7 @@ class ArcGoalGraph extends BaseView {
   
   function draw(dc as Dc) {
     dc.setColor(self.backgroundColor, self.backgroundColor);
-    dc.setPenWidth(2);
+    dc.setPenWidth(3);
 
     dc.drawArc(
       self.x,
@@ -77,7 +77,7 @@ class ArcGoalGraph extends BaseView {
     dc.setColor(self.color, self.color);
 
     var currentDegree = self.getCurrentDegree();
-    var circleDotRadius = 3;
+    var circleDotRadius = 4;
 
     dc.drawArc(
       self.x,

@@ -1,7 +1,7 @@
 import Toybox.WatchUi;
 import Toybox.Graphics;
 import Toybox.Lang;
-import StringHelpers;
+import Sura.StringHelper;
 
 class HeartRateView extends BaseView {
   private var _heartIcon = WatchUi.loadResource(Rez.Drawables.heartIcon);
@@ -28,7 +28,7 @@ class HeartRateView extends BaseView {
       }
     }
 
-    return StringHelpers.padStart(heartRate.format("%d"), 3, " ");
+    return StringHelper.padStart(heartRate.format("%d"), 3, " ");
   }
 
   function draw(dc as Dc) {

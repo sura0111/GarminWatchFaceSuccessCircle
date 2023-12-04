@@ -2,6 +2,7 @@ import Toybox.WatchUi;
 import Toybox.Graphics;
 import Toybox.System;
 import Toybox.Lang;
+import Sura.StringHelper;
 
 class Battery extends BaseView {
   var width as Number;
@@ -56,7 +57,7 @@ class Battery extends BaseView {
       batteryHeadX + batteryHeadWidth + 2,
       self.y - fontSizeOffset * 2,
       Graphics.FONT_XTINY,
-      StringHelpers.padStart(battery.format("%d") + "%", 4, " "),
+      StringHelper.padStart(battery.format("%d") + "%", 4, " "),
       Graphics.TEXT_JUSTIFY_LEFT
     );
   }

@@ -5,8 +5,13 @@ import Toybox.WatchUi;
 import Toybox.Activity;
 import Toybox.ActivityMonitor;
 import Toybox.Weather;
+import Toybox.Time;
+import Toybox.Position;
 import Toybox.SensorHistory;
 using Toybox.Time.Gregorian as Date;
+using Sura.Weather as SWeather;
+import Keg.Sun;
+using Sura.StringHelper;
 
 class MainWatchFace extends WatchUi.WatchFace {
   var screenWidth as Number = 0;
@@ -15,12 +20,14 @@ class MainWatchFace extends WatchUi.WatchFace {
   var battery as Battery;
   var heartRate as HeartRateView;
   var bodyBatteryBar as ArcGoalView;
+  var lastLocation as Array<Double> or Null = null;
 
   var is24Hour as Boolean = false;
   var isDoNotDisturb as Boolean = false;
 
   var iconDoNotDisturb as BitmapResource;
   var offsetX = 20;
+  var sun as Sun.SunInfo;
 
   public function initialize() {
     WatchFace.initialize();
@@ -38,8 +45,9 @@ class MainWatchFace extends WatchUi.WatchFace {
 
     self.battery = new Battery({});
     self.heartRate = new HeartRateView();
-    
+
     self.iconDoNotDisturb = WatchUi.loadResource(Rez.Drawables.doNotDisturbIcon);
+    self.sun = new Sun.SunInfo();
   }
 
   // Load your resources here
@@ -69,12 +77,16 @@ class MainWatchFace extends WatchUi.WatchFace {
       :x => screenCenterX + 38,
       :y => screenCenterY + 48 + 28
     });
+
+    self.updateLastLocation();
   }
 
   // Called when this View is brought to the foreground. Restore
   // the state of this View and prepare it to be shown. This includes
   // loading resources into memory.
-  public function onShow() as Void {}
+  public function onShow() as Void {
+    self.updateLastLocation();
+  }
 
   // Update the view
   public function onUpdate(dc as Dc) as Void {
@@ -99,6 +111,12 @@ class MainWatchFace extends WatchUi.WatchFace {
     var step = self.getStepText(info);
     var temperature = self.getTemperatureText(weather);
     var bodyBattery = self.getBodyBattery();
+
+    var minutesSinceMidnight = clockTime.hour * 60 + clockTime.min;
+    var sunInfo = self.sun.getInfo(self.lastLocation, new Time.Moment(Time.now().value()));
+    var isNight =
+          minutesSinceMidnight < ((sunInfo.sunrise.hour * 60) + sunInfo.sunrise.minute) ||
+          minutesSinceMidnight > ((sunInfo.sunset.hour * 60) + sunInfo.sunset.minute);
 
     /**
      * ------------------------
@@ -145,9 +163,14 @@ class MainWatchFace extends WatchUi.WatchFace {
       3
     );
 
-    // Temperature
+    // Weather
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.drawText(centerX, 20, Graphics.FONT_XTINY, temperature, Graphics.TEXT_JUSTIFY_CENTER);
+    dc.drawBitmap(
+      centerX - 50 - 30,
+      20 + 4,
+      WatchUi.loadResource(SWeather.getWeatherIcon(weather.condition, isNight))
+    );
+    dc.drawText(centerX - 50, 20, Graphics.FONT_XTINY, temperature, Graphics.TEXT_JUSTIFY_LEFT);
 
     // Separators
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
@@ -203,7 +226,12 @@ class MainWatchFace extends WatchUi.WatchFace {
   }
 
   private function getTemperatureText(currentCondition as Weather.CurrentConditions or Null) as String {
-    return currentCondition == null ? "~°C" : currentCondition.temperature.format("%d") + "°C";
+    if (currentCondition == null) {
+      return "--";
+    }
+    var temperature = StringHelper.padStart(currentCondition.temperature.format("%d"), 2, " ") + "°C";
+    var precipitationChance = StringHelper.padStart(currentCondition.precipitationChance.format("%d"), 2, " ") + "%";
+    return temperature + "/" + precipitationChance;
   }
 
   private function getBodyBatteryHistoryIterator() as SensorHistory.SensorHistoryIterator or Null {
@@ -233,6 +261,13 @@ class MainWatchFace extends WatchUi.WatchFace {
     }
 
     return 0;
+  }
+
+  private function updateLastLocation() {
+    var position = Position.getInfo();
+    if (position.accuracy != Position.QUALITY_NOT_AVAILABLE) {
+      self.lastLocation = position.position.toRadians();
+    }
   }
 }
 
