@@ -37,21 +37,21 @@ class Battery extends BaseView {
 
     // battery
     dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-    dc.fillRectangle(self.x, self.y - fontSizeOffset + 2, (self.width * battery / 100), self.height);
+    dc.fillRectangle(self.x, self.y - fontSizeOffset + 1, (self.width * battery / 100), self.height);
 
     // frame
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.drawRectangle(self.x, self.y - fontSizeOffset + 2, self.width, self.height);
+    dc.drawRectangle(self.x, self.y - fontSizeOffset + 1, self.width, self.height);
 
     // batteryHead
     if(battery == 100.0) {
         dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(batteryHeadX,  batteryHeadY - fontSizeOffset + 2,  batteryHeadWidth, batteryHeadHeight);
+        dc.fillRectangle(batteryHeadX,  batteryHeadY - fontSizeOffset + 1,  batteryHeadWidth, batteryHeadHeight);
     }
 
     // BatteryHead Frame
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.drawRectangle(batteryHeadX, batteryHeadY - fontSizeOffset + 2, batteryHeadWidth, batteryHeadHeight);
+    dc.drawRectangle(batteryHeadX, batteryHeadY - fontSizeOffset + 1, batteryHeadWidth, batteryHeadHeight);
 
     dc.drawText(
       batteryHeadX + batteryHeadWidth + 2,

@@ -29,6 +29,8 @@ class MainWatchFace extends WatchUi.WatchFace {
   var offsetX = 20;
   var sun as Sun.SunInfo;
 
+  var fontXTinySize = 30;
+
   public function initialize() {
     WatchFace.initialize();
 
@@ -43,7 +45,10 @@ class MainWatchFace extends WatchUi.WatchFace {
       :position => "left",
     });
 
-    self.battery = new Battery({});
+    self.battery = new Battery({
+      :width => 30,
+      :height => 15,
+    });
     self.heartRate = new HeartRateView();
 
     self.iconDoNotDisturb = WatchUi.loadResource(Rez.Drawables.doNotDisturbIcon);
@@ -137,6 +142,14 @@ class MainWatchFace extends WatchUi.WatchFace {
      * Draw
      * ------------------------
      */
+    // Seconds
+    dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
+    dc.fillCircle(
+      centerX + (centerX - 3) * Math.cos(clockTime.sec * Math.PI / 30 - Math.PI / 2), 
+      centerY + (centerY - 3) * Math.sin(clockTime.sec * Math.PI / 30 - Math.PI / 2),
+      3
+    );
+
     // Date
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.drawText(centerX, centerY - 54 - 40, Graphics.FONT_XTINY, date, Graphics.TEXT_JUSTIFY_CENTER);
@@ -156,21 +169,15 @@ class MainWatchFace extends WatchUi.WatchFace {
       Graphics.TEXT_JUSTIFY_LEFT
     );
 
-
-    dc.fillCircle(
-      centerX + (centerX - 2) * Math.cos(clockTime.sec * Math.PI / 30 - Math.PI / 2), 
-      centerY + (centerY - 2) * Math.sin(clockTime.sec * Math.PI / 30 - Math.PI / 2),
-      3
-    );
-
     // Weather
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
+    var weatherIcon = WatchUi.loadResource(SWeather.getWeatherIcon(weather.condition, isNight));
     dc.drawBitmap(
-      centerX - 50 - 30,
-      20 + 4,
+      centerX - 50 - weatherIcon.getWidth(),
+      40 - weatherIcon.getHeight() / 2,
       WatchUi.loadResource(SWeather.getWeatherIcon(weather.condition, isNight))
     );
-    dc.drawText(centerX - 50, 20, Graphics.FONT_XTINY, temperature, Graphics.TEXT_JUSTIFY_LEFT);
+    dc.drawText(centerX - 50, 40 - self.fontXTinySize / 2, Graphics.FONT_XTINY, temperature, Graphics.TEXT_JUSTIFY_LEFT);
 
     // Separators
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);

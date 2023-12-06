@@ -6,7 +6,7 @@ import Toybox.WatchUi;
 class ArcGoalView extends ArcGoalGraph {
   var textColor = Graphics.COLOR_LT_GRAY;
   var text = "";
-  var icon = null;
+  var icon as WatchUi.BitmapResource or Null = null;
 
   function initialize(params) {
     ArcGoalGraph.initialize(params);
@@ -27,7 +27,7 @@ class ArcGoalView extends ArcGoalGraph {
         self.getTextJustify()
       );
 
-      if (self.icon) {
+      if (self.icon != null) {
         dc.drawBitmap(
           tX + self.x + self.getIconOffsetX(),
           tY + self.y + self.getIconOffsetY(),
@@ -61,40 +61,40 @@ class ArcGoalView extends ArcGoalGraph {
 
   function getTextOffsetX() {
      switch (self.position) {
-      case "left": return 8;
       case "top": return 0;
       case "right": return -8;
       case "bottom": return 0;
+      case "left": return 8;
       default: return 0;
     }
   }
 
   function getTextOffsetY() {
      switch (self.position) {
-      case "left": return -8;
       case "top": return 0;
       case "right": return -8;
       case "bottom": return -48;
+      case "left": return -8;
       default: return -48;
     }
   }
 
   function getIconOffsetX() {
      switch (self.position) {
-      case "left": return 16;
-      case "top": return -12;
+      case "top": return -self.icon.getWidth() / 2;
       case "right": return 0;
-      case "bottom": return -12;
+      case "bottom": return -self.icon.getWidth() / 2;
+      case "left": return self.getTextOffsetX() + self.icon.getWidth() / 2;
       default: return 0;
     }
   }
 
   function getIconOffsetY() {
      switch (self.position) {
-      case "left": return -36;
       case "top": return 0;
       case "right": return -8;
-      case "bottom": return -74;
+      case "left": return -(self.icon.getHeight() + 12);
+      case "bottom": return -(self.icon.getHeight() - self.getTextOffsetY() + 4);
       default: return -100;
     }
   }

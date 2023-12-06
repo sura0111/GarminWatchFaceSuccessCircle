@@ -63,35 +63,38 @@ class ArcGoalGraph extends BaseView {
   
   function draw(dc as Dc) {
     dc.setColor(self.backgroundColor, self.backgroundColor);
-    dc.setPenWidth(3);
+    var penWidth = 4;
+    var radius = self.radius - penWidth / 2;
+    dc.setPenWidth(penWidth);
+    var startDegree = self.getStartDegree();
 
     dc.drawArc(
       self.x,
       self.y,
-      self.radius,
+      radius,
       self.direction,
-      self.getStartDegree(),
+      startDegree,
       self.getEndDegree()
     );
 
     dc.setColor(self.color, self.color);
 
     var currentDegree = self.getCurrentDegree();
-    var circleDotRadius = 4;
+    var circleDotRadius = penWidth * 1.25;
 
     dc.drawArc(
       self.x,
       self.y,
-      self.radius,
+      radius,
       self.direction,
-      self.getStartDegree(),
+      startDegree,
       currentDegree
     );
 
     dc.setColor(self.color, Graphics.COLOR_TRANSPARENT);
     dc.fillCircle(
-      self.x + Math.cos(currentDegree * Math.PI / 180) * self.radius + circleDotRadius / 2,
-      self.y - Math.sin(currentDegree * Math.PI / 180) * self.radius,
+      self.x + Math.cos(currentDegree * Math.PI / 180) * radius,
+      self.y - Math.sin(currentDegree * Math.PI / 180) * radius,
       circleDotRadius
     );
     dc.setPenWidth(1);
@@ -120,11 +123,12 @@ class ArcGoalGraph extends BaseView {
   }
 
   function getCurrentDegree() as Number {
+    var multiplier = self.getMultiplier();
     var startDegree = self.getStartDegree();
-    var currentDegree = self.getStartDegree() + (self.getMultiplier() * self.arcAngleRage * self.value  / self.goal);
+    var currentDegree = self.getStartDegree() + (multiplier * self.arcAngleRage * self.value  / self.goal);
 
     if (currentDegree == startDegree) {
-      return currentDegree + 1;
+      return currentDegree + multiplier;
     }
 
     return currentDegree;

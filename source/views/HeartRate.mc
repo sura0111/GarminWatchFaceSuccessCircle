@@ -4,7 +4,7 @@ import Toybox.Lang;
 import Sura.StringHelper;
 
 class HeartRateView extends BaseView {
-  private var _heartIcon = WatchUi.loadResource(Rez.Drawables.heartIcon);
+  private var _heartIcon as WatchUi.BitmapResource = WatchUi.loadResource(Rez.Drawables.heartIcon);
 
   function initialize() {
     BaseView.initialize();
@@ -33,9 +33,10 @@ class HeartRateView extends BaseView {
 
   function draw(dc as Dc) {
     var fontSizeOffset = 8;
-    dc.drawBitmap(self.x, self.y - 12, self._heartIcon);
+    dc.drawBitmap(self.x, self.y - self._heartIcon.getHeight() / 2, self._heartIcon);
+
     dc.drawText(
-      self.x + 24 + 4,
+      self.x + self._heartIcon.getWidth() + 4,
       self.y - fontSizeOffset * 2,
       Graphics.FONT_XTINY,
       self.getHeartRateText(),

@@ -1,35 +1,35 @@
 <drawables>
     <bitmap id="LauncherIcon" filename="launcher_icon.png" />
-    <bitmap id="heartIcon" filename="heart.png" />
-    <bitmap id="stepIcon" filename="step.png" />
-    <bitmap id="bodyBatteryIcon" filename="bodyBattery.png" />
     <bitmap id="doNotDisturbIcon" filename="doNotDisturb.png" />
+    <bitmap id="heartIcon" filename="30/heart-custom.png" />
+    <bitmap id="stepIcon" filename="30/shoe-print-custom.png" />
+    <bitmap id="bodyBatteryIcon" filename="30/lightning-bolt-custom.png" />
 
-    <bitmap id="weatherIceIcon" filename="snowflake-custom.png" />
-    <bitmap id="weatherSmokeIcon" filename="smoke-custom.png" />
-    <bitmap id="weatherCloudyIcon" filename="weather-cloudy-custom.png" />
-    <bitmap id="weatherDustIcon" filename="weather-dust-custom.png" />
-    <bitmap id="weatherFogIcon" filename="weather-fog-custom.png" />
-    <bitmap id="weatherHailIcon" filename="weather-hail-custom.png" />
-    <bitmap id="weatherHazyIcon" filename="weather-hazy-custom.png" />
-    <bitmap id="weatherHurricaneOutlineIcon" filename="weather-hurricane-outline-custom.png" />
-    <bitmap id="weatherLightningIcon" filename="weather-lightning-custom.png" />
-    <bitmap id="weatherLightningRainyIcon" filename="weather-lightning-rainy-custom.png" />
-    <bitmap id="weatherNightIcon" filename="weather-night-custom.png" />
-    <bitmap id="weatherNightPartlyCloudyIcon" filename="weather-night-partly-cloudy-custom.png" />
-    <bitmap id="weatherPartlyCloudyIcon" filename="weather-partly-cloudy-custom.png" />
-    <bitmap id="weatherPartlyLightningIcon" filename="weather-partly-lightning-custom.png" />
-    <bitmap id="weatherPartlyRainyIcon" filename="weather-partly-rainy-custom.png" />
-    <bitmap id="weatherPartlySnowyIcon" filename="weather-partly-snowy-custom.png" />
-    <bitmap id="weatherPartlySnowyRainyIcon" filename="weather-partly-snowy-rainy-custom.png" />
-    <bitmap id="weatherPouringIcon" filename="weather-pouring-custom.png" />
-    <bitmap id="weatherRainyIcon" filename="weather-rainy-custom.png" />
-    <bitmap id="weatherSnowyHeavyIcon" filename="weather-snowy-heavy-custom.png" />
-    <bitmap id="weatherSnowyIcon" filename="weather-snowy-custom.png" />
-    <bitmap id="weatherSnowyRainyIcon" filename="weather-snowy-rainy-custom.png" />
-    <bitmap id="weatherSunnyAlertIcon" filename="weather-sunny-alert-custom.png" />
-    <bitmap id="weatherSunnyIcon" filename="weather-sunny-custom.png" />
-    <bitmap id="weatherTornadoIcon" filename="weather-tornado-custom.png" />
-    <bitmap id="weatherWindyIcon" filename="weather-windy-custom.png" />
-    <bitmap id="weatherWindyVariantIcon" filename="weather-windy-variant-custom.png" />
+    <bitmap id="weatherIceIcon" filename="30/snowflake-custom.png" />
+    <bitmap id="weatherSmokeIcon" filename="30/smoke-custom.png" />
+    <bitmap id="weatherCloudyIcon" filename="30/weather-cloudy-custom.png" />
+    <bitmap id="weatherDustIcon" filename="30/weather-dust-custom.png" />
+    <bitmap id="weatherFogIcon" filename="30/weather-fog-custom.png" />
+    <bitmap id="weatherHailIcon" filename="30/weather-hail-custom.png" />
+    <bitmap id="weatherHazyIcon" filename="30/weather-hazy-custom.png" />
+    <bitmap id="weatherHurricaneOutlineIcon" filename="30/weather-hurricane-outline-custom.png" />
+    <bitmap id="weatherLightningIcon" filename="30/weather-lightning-custom.png" />
+    <bitmap id="weatherLightningRainyIcon" filename="30/weather-lightning-rainy-custom.png" />
+    <bitmap id="weatherNightIcon" filename="30/weather-night-custom.png" />
+    <bitmap id="weatherNightPartlyCloudyIcon" filename="30/weather-night-partly-cloudy-custom.png" />
+    <bitmap id="weatherPartlyCloudyIcon" filename="30/weather-partly-cloudy-custom.png" />
+    <bitmap id="weatherPartlyLightningIcon" filename="30/weather-partly-lightning-custom.png" />
+    <bitmap id="weatherPartlyRainyIcon" filename="30/weather-partly-rainy-custom.png" />
+    <bitmap id="weatherPartlySnowyIcon" filename="30/weather-partly-snowy-custom.png" />
+    <bitmap id="weatherPartlySnowyRainyIcon" filename="30/weather-partly-snowy-rainy-custom.png" />
+    <bitmap id="weatherPouringIcon" filename="30/weather-pouring-custom.png" />
+    <bitmap id="weatherRainyIcon" filename="30/weather-rainy-custom.png" />
+    <bitmap id="weatherSnowyHeavyIcon" filename="30/weather-snowy-heavy-custom.png" />
+    <bitmap id="weatherSnowyIcon" filename="30/weather-snowy-custom.png" />
+    <bitmap id="weatherSnowyRainyIcon" filename="30/weather-snowy-rainy-custom.png" />
+    <bitmap id="weatherSunnyAlertIcon" filename="30/weather-sunny-alert-custom.png" />
+    <bitmap id="weatherSunnyIcon" filename="30/weather-sunny-custom.png" />
+    <bitmap id="weatherTornadoIcon" filename="30/weather-tornado-custom.png" />
+    <bitmap id="weatherWindyIcon" filename="30/weather-windy-custom.png" />
+    <bitmap id="weatherWindyVariantIcon" filename="30/weather-windy-variant-custom.png" />
 </drawables>
