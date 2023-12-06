@@ -73,9 +73,9 @@ class ArcGoalView extends ArcGoalGraph {
      switch (self.position) {
       case "top": return 0;
       case "right": return -8;
-      case "bottom": return -48;
+      case "bottom": return -56;
       case "left": return -8;
-      default: return -48;
+      default: return -56;
     }
   }
 
@@ -84,7 +84,7 @@ class ArcGoalView extends ArcGoalGraph {
       case "top": return -self.icon.getWidth() / 2;
       case "right": return 0;
       case "bottom": return -self.icon.getWidth() / 2;
-      case "left": return self.getTextOffsetX() + self.icon.getWidth() / 2;
+      case "left": return self.getTextOffsetX() + self.icon.getWidth() / 2 - 10;
       default: return 0;
     }
   }
