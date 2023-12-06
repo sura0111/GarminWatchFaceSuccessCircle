@@ -26,10 +26,14 @@ class MainWatchFace extends WatchUi.WatchFace {
   var isDoNotDisturb as Boolean = false;
 
   var iconDoNotDisturb as BitmapResource;
+  var backgroundImage as BitmapResource or Null = null;
   var offsetX = 20;
   var sun as Sun.SunInfo;
 
+  var topSeparatorY as Number = 0;
+  var bottomSeparatorY as Number = 0;
   var fontXTinySize = 30;
+  var fontNumberHotSize = 74;
 
   public function initialize() {
     WatchFace.initialize();
@@ -63,6 +67,9 @@ class MainWatchFace extends WatchUi.WatchFace {
     self.screenHeight = dc.getHeight();
     var screenCenterX = self.getCenterX();
     var screenCenterY = self.getCenterY();
+    self.topSeparatorY = screenCenterY - screenHeight / 8 - 2;
+    self.bottomSeparatorY = screenCenterY + screenHeight / 8 - 2;
+
     var arcRadius = (self.screenWidth > self.screenHeight ? screenCenterY : screenCenterX) - 8;
 
     self.stepBar.setPosition({ :x => screenCenterX, :y => screenCenterY });
@@ -75,15 +82,19 @@ class MainWatchFace extends WatchUi.WatchFace {
 
     self.heartRate.setPosition({
       :x => screenCenterX - 120,
-      :y => screenCenterY + 48 + 28
+      :y => self.bottomSeparatorY + 12 + 8
     });
 
     self.battery.setPosition({
       :x => screenCenterX + 38,
-      :y => screenCenterY + 48 + 28
+      :y => self.bottomSeparatorY + 12 + 8
     });
 
     self.updateLastLocation();
+
+    self.backgroundImage = WatchUi.loadResource(
+      self.isBigScreen() ? Rez.Drawables.backgroundBig : Rez.Drawables.backgroundSmall
+    );
   }
 
   // Called when this View is brought to the foreground. Restore
@@ -97,6 +108,15 @@ class MainWatchFace extends WatchUi.WatchFace {
   public function onUpdate(dc as Dc) as Void {
     // Call the parent onUpdate function to redraw the layout
     View.onUpdate(dc);
+    
+    if (self.backgroundImage != null) {
+      dc.drawBitmap(
+        self.getCenterX() - backgroundImage.getWidth() / 2, 
+        self.getCenterY() - backgroundImage.getHeight() / 2,
+        self.backgroundImage
+      );
+    }
+
     var clockTime = System.getClockTime();
     var centerX = self.getCenterX();
     var centerY = self.getCenterY();
@@ -142,7 +162,7 @@ class MainWatchFace extends WatchUi.WatchFace {
      * Draw
      * ------------------------
      */
-    // Seconds
+    // Seconds Dot
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.fillCircle(
       centerX + (centerX - 3) * Math.cos(clockTime.sec * Math.PI / 30 - Math.PI / 2), 
@@ -152,21 +172,21 @@ class MainWatchFace extends WatchUi.WatchFace {
 
     // Date
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.drawText(centerX, centerY - 54 - 40, Graphics.FONT_XTINY, date, Graphics.TEXT_JUSTIFY_CENTER);
+    dc.drawText(centerX, self.topSeparatorY - self.fontXTinySize - 12, Graphics.FONT_XTINY, date, Graphics.TEXT_JUSTIFY_CENTER);
     
     if (self.isDoNotDisturb) {
-      dc.drawBitmap(centerX + - 12, centerY - 54 - 12 - 72, self.iconDoNotDisturb);
+      dc.drawBitmap(centerX + - 12, topSeparatorY - 12 - 72, self.iconDoNotDisturb);
     }
 
     // Time
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.drawText(centerX + offsetX, centerY - 67, Graphics.FONT_NUMBER_HOT, time, Graphics.TEXT_JUSTIFY_CENTER);
+    dc.drawText(screenWidth - 45, centerY, Graphics.FONT_NUMBER_HOT, time, Graphics.TEXT_JUSTIFY_VCENTER);
     dc.drawText(
-      centerX + offsetX + 150,
-      centerY - 10,
+      screenWidth - 10,
+      centerY,
       Graphics.FONT_XTINY,
       clockTime.sec.format("%02d"),
-      Graphics.TEXT_JUSTIFY_LEFT
+      Graphics.TEXT_JUSTIFY_VCENTER
     );
 
     // Weather
@@ -182,8 +202,8 @@ class MainWatchFace extends WatchUi.WatchFace {
     // Separators
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.setPenWidth(2);
-    dc.drawLine(centerX + offsetX - 150, centerY - 54, centerX + offsetX + 150, centerY - 54);
-    dc.drawLine(centerX + offsetX - 150, centerY + 54, centerX + offsetX + 150, centerY + 54);
+    dc.drawLine(centerX + offsetX - 150, self.topSeparatorY, centerX + offsetX + 150, self.topSeparatorY);
+    dc.drawLine(centerX + offsetX - 150, self.bottomSeparatorY, centerX + offsetX + 150, self.bottomSeparatorY);
     dc.setPenWidth(1);
 
     self.stepBar.draw(dc);
@@ -276,5 +296,8 @@ class MainWatchFace extends WatchUi.WatchFace {
       self.lastLocation = position.position.toRadians();
     }
   }
-}
 
+  private function isBigScreen() {
+    return self.screenWidth > 416 || self.screenHeight > 416;
+  }
+}

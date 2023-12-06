@@ -1,3 +1,1 @@
-<layout id="WatchFace">
-    <bitmap id="background" x="0" y="0" filename="../drawables/backgrounds/background3.jpg"></bitmap>
-</layout>
+<layout id="WatchFace"></layout>
