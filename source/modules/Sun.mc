@@ -10,7 +10,7 @@ module Sura {
     var location as Array<Double> or Null = null;
     var sun as Sun.SunInfo = new Sun.SunInfo();
 
-    function loadLocation() as Void {
+    function init() as Void {
       var position = Position.getInfo();
       if (position.accuracy != Position.QUALITY_NOT_AVAILABLE) {
         var pos = position.position;

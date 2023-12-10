@@ -56,7 +56,7 @@ module Sura {
     var isBackgroundImageSupported as Boolean = false;
     var isSmallScreen as Boolean = false;
 
-    function load(dc as Dc) as Void {
+    function init(dc as Dc) as Void {
       self.screenSize = Sura.Vectors.Vector2d.createFromXY(dc.getWidth(), dc.getHeight());
       self.screenCenter = Sura.Vectors.Vector2d.createFromVector(self.screenSize).divide(2);
       self.deviceSizeConfig = self.getDeviceSizeConfig();

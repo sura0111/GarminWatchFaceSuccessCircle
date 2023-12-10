@@ -8,8 +8,8 @@ module Sura {
     var is24Hour as Boolean = false;
     var clockTime as System.ClockTime or Null = null;
 
-    function setup(is24Hour as Boolean) {
-      self.is24Hour = is24Hour;
+    function init() {
+      self.is24Hour = System.getDeviceSettings().is24Hour;
       self.clockTime = System.getClockTime();
     }
 
@@ -37,6 +37,16 @@ module Sura {
       var dateText = Lang.format("$1$ $2$ ($3$)", [ date.month, date.day, date.day_of_week ]);
 
       return dateText;
+    }
+
+    function getSecondsText() as String {
+      if (clockTime == null) {
+        return "";
+      }
+
+      var secondsText = Lang.format("$1$", [clockTime.sec.format("%02d")]);
+
+      return secondsText;
     }
   }
 }

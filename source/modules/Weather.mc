@@ -98,7 +98,7 @@ module Sura {
       }
     }
 
-    function loadCurrentConditions() as Void {
+    function init() as Void {
       Sura.Weather.currentConditions = Weather.getCurrentConditions(); 
     }
 
