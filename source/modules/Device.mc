@@ -10,27 +10,32 @@ module Sura {
     var deviceSizeConfigs as Array<{
       :size as Number,
       :timeFontSize as Graphics.FontDefinition,
-      :isBackgroundImageSupported as Boolean
+      :isBackgroundImageSupported as Boolean,
+      :isSmallScreen as Boolean
     }> = [
       {
         :size => 260,
         :timeFontSize => Graphics.FONT_NUMBER_MEDIUM,
         :isBackgroundImageSupported => false,
+        :isSmallScreen => true,
       },
       {
         :size => 360,
         :timeFontSize => Graphics.FONT_NUMBER_MEDIUM,
-        :isBackgroundImageSupported => false,
+        :isBackgroundImageSupported => true,
+        :isSmallScreen => false,
       },
       {
         :size => 416,
         :timeFontSize => Graphics.FONT_NUMBER_HOT,
         :isBackgroundImageSupported => true,
+        :isSmallScreen => false,
       },
       {
         :size => 454,
         :timeFontSize => Graphics.FONT_NUMBER_HOT,
         :isBackgroundImageSupported => true,
+        :isSmallScreen => false,
       }
     ] as Array<{
       :size as Number,
@@ -44,10 +49,12 @@ module Sura {
     } = {
       :size => 0,
       :timeFontSize => Graphics.FONT_NUMBER_MEDIUM,
-      :isBackgroundImageSupported => false
+      :isBackgroundImageSupported => false,
+      :isSmallScreen => true
     };
     var timeFontSize as Graphics.FontDefinition = Graphics.FONT_NUMBER_MEDIUM;
     var isBackgroundImageSupported as Boolean = false;
+    var isSmallScreen as Boolean = false;
 
     function load(dc as Dc) as Void {
       self.screenSize = Sura.Vectors.Vector2d.createFromXY(dc.getWidth(), dc.getHeight());
@@ -55,8 +62,10 @@ module Sura {
       self.deviceSizeConfig = self.getDeviceSizeConfig();
       var timeFontSize = self.deviceSizeConfig[:timeFontSize];
       var isBackgroundImageSupported = self.deviceSizeConfig[:isBackgroundImageSupported];
+      var isSmallScreen = self.deviceSizeConfig[:isSmallScreen];
       self.timeFontSize = timeFontSize == null ? Graphics.FONT_NUMBER_MEDIUM : timeFontSize;
       self.isBackgroundImageSupported =  isBackgroundImageSupported == null ? false : isBackgroundImageSupported;
+      self.isSmallScreen =  isSmallScreen == null ? false : isSmallScreen;
     }
 
     function getDeviceSizeConfig() as {

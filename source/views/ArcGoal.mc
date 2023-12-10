@@ -60,6 +60,35 @@ class ArcGoalView extends ArcGoalGraphView {
     self.icon = icon;
   }
 
+  function getIconHeight() as Number {
+    if (self.icon == null) {
+      return 0;
+    }
+    return self.icon.getHeight();
+  }
+
+  function getIconWidth() as Number {
+    if (self.icon == null) {
+      return 0;
+    }
+    return self.icon.getWidth();
+  }
+
+  function getGap() as Number {
+    if (self.icon == null) {
+      return 0;
+    }
+    return 4;
+  }
+
+  function getFontHeight() as Number {
+    return Graphics.getFontHeight(Graphics.FONT_XTINY);
+  }
+
+  function getTotalHeight() as Number {
+    return self.getIconHeight() + self.getFontHeight() + self.getGap();
+  }
+
   function getTextJustify() as Graphics.TextJustification {
      switch (self.position) {
       case "left": return Graphics.TEXT_JUSTIFY_LEFT;
@@ -73,9 +102,9 @@ class ArcGoalView extends ArcGoalGraphView {
   function getTextOffsetX() as Number {
      switch (self.position) {
       case "top": return 0;
-      case "right": return - Graphics.getFontHeight(Graphics.FONT_XTINY) / 2;
+      case "right": return - self.getFontHeight() / 2;
       case "bottom": return 0;
-      case "left": return Graphics.getFontHeight(Graphics.FONT_XTINY) / 2;
+      case "left": return self.getFontHeight() / 2;
       default: return 0;
     }
   }
@@ -84,18 +113,18 @@ class ArcGoalView extends ArcGoalGraphView {
      switch (self.position) {
       case "top": return 0;
       case "right": return -8;
-      case "bottom": return - Graphics.getFontHeight(Graphics.FONT_XTINY) - 12;
-      case "left": return ((self.icon.getHeight() - Graphics.getFontHeight(Graphics.FONT_XTINY)) / 2).toNumber();
-      default: return - Graphics.getFontHeight(Graphics.FONT_XTINY) - 12;
+      case "bottom": return - self.getFontHeight() - 12;
+      case "left": return (-(self.getTotalHeight() / 2) + self.getGap() + self.getIconHeight()).toNumber();
+      default: return - self.getFontHeight() - 12;
     }
   }
 
   function getIconOffsetX() as Number {
      switch (self.position) {
       case "top": return -self.icon.getWidth() / 2;
-      case "right": return (- Graphics.getFontHeight(Graphics.FONT_XTINY) / 2).toNumber();
+      case "right": return (- self.getFontHeight() / 2).toNumber();
       case "bottom": return -self.icon.getWidth() / 2;
-      case "left": return (Graphics.getFontHeight(Graphics.FONT_XTINY) / 2).toNumber();
+      case "left": return (self.getFontHeight() / 2).toNumber();
       default: return 0;
     }
   }
@@ -104,8 +133,8 @@ class ArcGoalView extends ArcGoalGraphView {
      switch (self.position) {
       case "top": return 0;
       case "right": return -8;
-      case "left": return (- self.icon.getHeight() - (self.icon.getHeight() - Graphics.getFontHeight(Graphics.FONT_XTINY)) / 2 - 4).toNumber();
-      case "bottom": return (-(self.icon.getHeight() - self.getTextOffsetY() + 4)).toNumber();
+      case "bottom": return (-1 * self.getTotalHeight() - 12).toNumber();
+      case "left": return (-1 * self.getTotalHeight() / 2).toNumber();
       default: return -100;
     }
   }

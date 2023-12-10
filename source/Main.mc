@@ -13,9 +13,10 @@ import Sura.Device;
 import Sura.BodyBattery;
 
 class MainWatchFace extends WatchUi.WatchFace {
-  var offsetX as Number = 20;
+  var offsetX as Number = 50;
   var topSeparatorY as Number = 0;
   var bottomSeparatorY as Number = 0;
+  var timeFontSize as Graphics.FontDefinition = Graphics.FONT_NUMBER_MEDIUM;
 
   var stepBar as ArcGoalView;
   var battery as Battery;
@@ -24,7 +25,6 @@ class MainWatchFace extends WatchUi.WatchFace {
   var iconDoNotDisturb as WatchUi.Resource;
   var backgroundImage as WatchUi.Resource or Null = null;
 
-  var is24Hour as Boolean = false;
   var isDoNotDisturb as Boolean = false;
   var temperatureUnits as System.UnitsSystem or Null = null;
 
@@ -56,33 +56,37 @@ class MainWatchFace extends WatchUi.WatchFace {
     setLayout(Rez.Layouts.WatchFace(dc));
     Device.load(dc);
 
-    self.topSeparatorY = Device.screenCenter.x - (Graphics.getFontHeight(Device.timeFontSize) / 2).toNumber();
-    self.bottomSeparatorY = Device.screenCenter.x + (Graphics.getFontHeight(Device.timeFontSize) / 2).toNumber();
+    self.offsetX = (Graphics.getFontHeight(Graphics.FONT_XTINY) * 2.8).toNumber();
+    updateTimeFontSize();
+
+    self.topSeparatorY = Device.screenCenter.x - (Graphics.getFontHeight(timeFontSize) / 2).toNumber();
+    self.bottomSeparatorY = Device.screenCenter.x + (Graphics.getFontHeight(timeFontSize) / 2).toNumber();
 
     var arcRadius = Device.screenCenter.getMin() - 8;
 
     self.stepBar.setPosition(Device.screenCenter.x, Device.screenCenter.x);
     self.stepBar.setRadius(arcRadius);
-    self.stepBar.setIcon(WatchUi.loadResource(Rez.Drawables.stepIcon));
+    if (Device.isSmallScreen == false) {
+      self.stepBar.setIcon(WatchUi.loadResource(Rez.Drawables.stepIcon));
+    }
 
     self.bodyBatteryBar.setPosition(Device.screenCenter.x, Device.screenCenter.x);
     self.bodyBatteryBar.setRadius(arcRadius);
     self.bodyBatteryBar.setIcon(WatchUi.loadResource(Rez.Drawables.bodyBatteryIcon));
 
     self.heartRate.setPosition(
-      Device.screenCenter.x - 120,
+      (Device.screenCenter.x - self.offsetX).toNumber(),
       self.bottomSeparatorY + 12 + Graphics.getFontHeight(Graphics.FONT_XTINY) / 2
     );
 
     self.battery.setPosition(
-      Device.screenCenter.x + 38,
+      (Device.screenCenter.x + Graphics.getFontHeight(Graphics.FONT_XTINY)).toNumber(),
       self.bottomSeparatorY + 12 + Graphics.getFontHeight(Graphics.FONT_XTINY) / 2
     );
 
     self.backgroundImage = Device.isBackgroundImageSupported? WatchUi.loadResource(
       Device.screenSize.getMin() > 416 ? Rez.Drawables.backgroundBig : Rez.Drawables.backgroundSmall
     ) : null;
-
   }
 
   // Called when this View is brought to the foreground. Restore
@@ -98,10 +102,11 @@ class MainWatchFace extends WatchUi.WatchFace {
     View.onUpdate(dc);
 
     var settings = System.getDeviceSettings();
-    self.is24Hour = settings.is24Hour;
     self.isDoNotDisturb = settings.doNotDisturb;
     self.temperatureUnits = settings.temperatureUnits;
     Sura.Weather.loadCurrentConditions();
+    Sura.Datetime.setup(settings.is24Hour);
+    updateTimeFontSize();
     
     if (self.backgroundImage != null) {
       dc.drawBitmap(
@@ -121,8 +126,6 @@ class MainWatchFace extends WatchUi.WatchFace {
      * ------------------------
      */
     var info = ActivityMonitor.getInfo();
-    var time = self.getTimeText(clockTime);
-    var date = self.getDateText();
     var step = self.getStepText(info);
     var bodyBattery = Sura.BodyBattery.getBodyBattery();
     var isNight = Sun.getIsNight();
@@ -146,13 +149,6 @@ class MainWatchFace extends WatchUi.WatchFace {
      * Draw
      * ------------------------
      */
-    // Seconds Dot
-    dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.fillCircle(
-      centerX + (centerX - 3) * Math.cos(clockTime.sec * Math.PI / 30 - Math.PI / 2), 
-      centerY + (centerY - 3) * Math.sin(clockTime.sec * Math.PI / 30 - Math.PI / 2),
-      3
-    );
 
     // Date
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
@@ -160,11 +156,11 @@ class MainWatchFace extends WatchUi.WatchFace {
       centerX,
       self.topSeparatorY - Graphics.getFontHeight(Graphics.FONT_XTINY) - 12,
       Graphics.FONT_XTINY,
-      date,
+      Sura.Datetime.getDateText(),
       Graphics.TEXT_JUSTIFY_CENTER
     );
     
-    if (self.isDoNotDisturb) {
+    if (self.isDoNotDisturb && !Device.isSmallScreen) {
       dc.drawBitmap(
         centerX - self.iconDoNotDisturb.getWidth() / 2,
         self.topSeparatorY - Graphics.getFontHeight(Graphics.FONT_XTINY) - 12 - self.iconDoNotDisturb.getHeight() - 6,
@@ -174,10 +170,23 @@ class MainWatchFace extends WatchUi.WatchFace {
 
     // Time
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.drawText(Device.screenSize.x - 45, centerY, Device.timeFontSize, time, Graphics.TEXT_JUSTIFY_VCENTER);
+    dc.drawText(
+      Device.screenSize.x - offsetX * (timeFontSize == Graphics.FONT_NUMBER_HOT ? 0.5 : 0.8),
+      centerY,
+      timeFontSize,
+      Sura.Datetime.getTimeText(),
+      Graphics.TEXT_JUSTIFY_VCENTER
+    );
     dc.drawText(
       Device.screenSize.x - 10,
-      centerY,
+      centerY - Graphics.getFontHeight(Graphics.FONT_XTINY) / 2,
+      Graphics.FONT_XTINY,
+      Sura.Datetime.getAmPm(),
+      Graphics.TEXT_JUSTIFY_VCENTER
+    );
+    dc.drawText(
+      Device.screenSize.x - 10,
+      centerY + Graphics.getFontHeight(Graphics.FONT_XTINY) / 2,
       Graphics.FONT_XTINY,
       clockTime.sec.format("%02d"),
       Graphics.TEXT_JUSTIFY_VCENTER
@@ -188,13 +197,13 @@ class MainWatchFace extends WatchUi.WatchFace {
     var weatherIcon = Sura.Weather.getWeatherIcon(isNight);
     if (weatherIcon != null) {
       dc.drawBitmap(
-        centerX - 50 - weatherIcon.getWidth(),
+        centerX - offsetX * 0.5 - weatherIcon.getWidth(),
         40 - weatherIcon.getHeight() / 2,
         weatherIcon
       );
     }
     dc.drawText(
-      centerX - 50,
+      centerX - offsetX * 0.5,
       40 - Graphics.getFontHeight(Graphics.FONT_XTINY) / 2,
       Graphics.FONT_XTINY,
       Sura.Weather.getTemperatureAndPrecipitationChanceInfo(self.temperatureUnits),
@@ -204,30 +213,14 @@ class MainWatchFace extends WatchUi.WatchFace {
     // Separators
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.setPenWidth(2);
-    dc.drawLine(centerX + offsetX - Device.screenSize.x * 0.38, self.topSeparatorY, centerX + offsetX + Device.screenSize.x * 0.38, self.topSeparatorY);
-    dc.drawLine(centerX + offsetX - Device.screenSize.x * 0.38, self.bottomSeparatorY, centerX + offsetX + Device.screenSize.x * 0.38, self.bottomSeparatorY);
+    dc.drawLine(offsetX, self.topSeparatorY, Device.screenSize.x, self.topSeparatorY);
+    dc.drawLine(offsetX, self.bottomSeparatorY, Device.screenSize.x, self.bottomSeparatorY);
     dc.setPenWidth(1);
 
     self.stepBar.draw(dc);
     self.battery.draw(dc);
     self.heartRate.draw(dc);
     self.bodyBatteryBar.draw(dc);
-  }
-
-  private function getTimeText(clockTime as System.ClockTime) as String {
-    var hour = self.is24Hour ? clockTime.hour : (clockTime.hour % 12 == 0 ? 12 : clockTime.hour % 12);
-    var ampm = self.is24Hour ? "" : (clockTime.hour >= 12 && clockTime.hour < 24 ? " PM" : " AM");
-    var timeText = Lang.format("$1$:$2$$3$", [hour.format("%02d"), clockTime.min.format("%02d"), ampm]);
-
-    return timeText;
-  }
-
-  private function getDateText() as String {
-    var now = Time.now();
-    var date = Date.info(now, Time.FORMAT_LONG);
-    var dateText = Lang.format("$1$ $2$ ($3$)", [ date.month, date.day, date.day_of_week ]);
-
-    return dateText;
   }
 
   private function getStepText(info as ActivityMonitor.Info) as String {
@@ -238,6 +231,10 @@ class MainWatchFace extends WatchUi.WatchFace {
     }
 
     return stepText;
+  }
+
+  function updateTimeFontSize() {
+    timeFontSize = Sura.Datetime.is24Hour ? Device.timeFontSize : Graphics.FONT_NUMBER_MEDIUM;
   }
 
   // // Called when this View is removed from the screen. Save the
