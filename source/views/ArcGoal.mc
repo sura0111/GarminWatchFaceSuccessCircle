@@ -113,9 +113,9 @@ class ArcGoalView extends ArcGoalGraphView {
      switch (self.position) {
       case "top": return 0;
       case "right": return -8;
-      case "bottom": return - self.getFontHeight() - 12;
+      case "bottom": return - self.getFontHeight() - 20;
       case "left": return (-(self.getTotalHeight() / 2) + self.getGap() + self.getIconHeight()).toNumber();
-      default: return - self.getFontHeight() - 12;
+      default: return - self.getFontHeight() - 20;
     }
   }
 
@@ -133,7 +133,7 @@ class ArcGoalView extends ArcGoalGraphView {
      switch (self.position) {
       case "top": return 0;
       case "right": return -8;
-      case "bottom": return (-1 * self.getTotalHeight() - 12).toNumber();
+      case "bottom": return (-1 * self.getTotalHeight() - 20).toNumber();
       case "left": return (-1 * self.getTotalHeight() / 2).toNumber();
       default: return -100;
     }
