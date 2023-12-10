@@ -17,6 +17,7 @@ class MainWatchFace extends WatchUi.WatchFace {
   var topSeparatorY as Number = 0;
   var bottomSeparatorY as Number = 0;
   var timeFontSize as Graphics.FontDefinition = Graphics.FONT_NUMBER_MEDIUM;
+  var isLowPowerMode = false;
 
   var stepBar as ArcGoalView;
   var battery as Battery;
@@ -75,7 +76,7 @@ class MainWatchFace extends WatchUi.WatchFace {
     self.bodyBatteryBar.setIcon(WatchUi.loadResource(Rez.Drawables.bodyBatteryIcon));
 
     self.heartRate.setPosition(
-      (Device.screenCenter.x - self.offsetX).toNumber(),
+      self.offsetX,
       self.bottomSeparatorY + 12 + Graphics.getFontHeight(Graphics.FONT_XTINY) / 2
     );
 
@@ -107,8 +108,11 @@ class MainWatchFace extends WatchUi.WatchFace {
     Sura.Weather.loadCurrentConditions();
     Sura.Datetime.setup(settings.is24Hour);
     updateTimeFontSize();
+
+    dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_TRANSPARENT);
+    dc.clear();
     
-    if (self.backgroundImage != null) {
+    if (self.backgroundImage != null && !self.isLowPowerMode) {
       dc.drawBitmap(
         Device.screenCenter.x - backgroundImage.getWidth() / 2, 
         Device.screenCenter.y - backgroundImage.getHeight() / 2,
@@ -136,13 +140,16 @@ class MainWatchFace extends WatchUi.WatchFace {
      * ------------------------
      */
 
-    // Step 
-    self.stepBar.setData({ :value => info.steps, :goal => info.stepGoal });
-    self.stepBar.setText(step);
+    if (!self.isLowPowerMode) {
+      // Step 
+      self.stepBar.setData({ :value => info.steps, :goal => info.stepGoal });
+      self.stepBar.setText(step);
 
-    // bodyBattery
-    self.bodyBatteryBar.setData({ :value => bodyBattery, :goal => 100 });
-    self.bodyBatteryBar.setText(bodyBattery.format("%d") + "%");
+      // bodyBattery
+      self.bodyBatteryBar.setData({ :value => bodyBattery, :goal => 100 });
+      self.bodyBatteryBar.setText(bodyBattery.format("%d") + "%");
+    }
+
 
     /**
      * ------------------------
@@ -184,13 +191,16 @@ class MainWatchFace extends WatchUi.WatchFace {
       Sura.Datetime.getAmPm(),
       Graphics.TEXT_JUSTIFY_VCENTER
     );
-    dc.drawText(
-      Device.screenSize.x - 10,
-      centerY + Graphics.getFontHeight(Graphics.FONT_XTINY) / 2,
-      Graphics.FONT_XTINY,
-      clockTime.sec.format("%02d"),
-      Graphics.TEXT_JUSTIFY_VCENTER
-    );
+
+    if (!self.isLowPowerMode) {
+      dc.drawText(
+        Device.screenSize.x - 10,
+        centerY + Graphics.getFontHeight(Graphics.FONT_XTINY) / 2,
+        Graphics.FONT_XTINY,
+        clockTime.sec.format("%02d"),
+        Graphics.TEXT_JUSTIFY_VCENTER
+      );
+    }
 
     // Weather
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
@@ -217,10 +227,13 @@ class MainWatchFace extends WatchUi.WatchFace {
     dc.drawLine(offsetX, self.bottomSeparatorY, Device.screenSize.x, self.bottomSeparatorY);
     dc.setPenWidth(1);
 
-    self.stepBar.draw(dc);
+    if (!self.isLowPowerMode) {
+      self.stepBar.draw(dc);
+      self.bodyBatteryBar.draw(dc);
+    }
+
     self.battery.draw(dc);
     self.heartRate.draw(dc);
-    self.bodyBatteryBar.draw(dc);
   }
 
   private function getStepText(info as ActivityMonitor.Info) as String {
@@ -242,10 +255,14 @@ class MainWatchFace extends WatchUi.WatchFace {
   // // memory.
   // public function onHide() as Void {}
 
-  // // The user has just looked at their watch. Timers and animations may be
-  // // started here.
-  // public function onExitSleep() as Void {}
+  // The user has just looked at their watch. Timers and animations may be
+  // started here.
+  public function onExitSleep() as Void {
+    self.isLowPowerMode = false;
+  }
 
-  // // Terminate any active timers and prepare for slow updates.
-  // public function onEnterSleep() as Void {}
+  // Terminate any active timers and prepare for slow updates.
+  public function onEnterSleep() as Void {
+    self.isLowPowerMode = true;
+  }
 }
