@@ -143,7 +143,7 @@ class ArcGoalGraphView extends BaseView {
     var startDegree = self.getStartDegree();
     var percentage = self.value.toFloat() / self.goal.toFloat();
     var displayPercentage = percentage > 1 ? 1 : percentage;
-    var currentDegree = self.getStartDegree() + (multiplier * self.arcAngleRage * displayPercentage);
+    var currentDegree = (self.getStartDegree() + (multiplier * self.arcAngleRage * displayPercentage)).toNumber();
 
     if (currentDegree == startDegree) {
       return currentDegree + multiplier;
