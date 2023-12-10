@@ -4,67 +4,83 @@ import Toybox.Math;
 import Toybox.WatchUi;
 import Toybox.Graphics;
 
-class ArcGoalGraph extends BaseView {
+class ArcGoalGraphView extends BaseView {
   var value as Number = 0;
   var goal as Number = 1;
-  var color = Graphics.COLOR_BLUE;
-  var backgroundColor = Graphics.COLOR_LT_GRAY;
-  var direction = Graphics.ARC_CLOCKWISE;
-  var radius = 20;
-  var position = 20;
+  var color as Graphics.ColorValue = Graphics.COLOR_BLUE;
+  var backgroundColor as Graphics.ColorValue = Graphics.COLOR_LT_GRAY;
+  var direction as Graphics.ArcDirection = Graphics.ARC_CLOCKWISE;
+  var radius as Number = 20;
+  var position as String = "bottom";
   var arcAngleRage as Number = 75;
 
   function initialize(params as {
-    :value as Number or Null,
-    :goal as Number or Null,
-    :color as Number or Null,
-    :backgroundColor as Number or Null,
-    :direction as Number or Null,
-    :radius as Number or Null,
-    :position as String or Null,
-    :arcAngleRage as Number or Null,
+    :value as Number?,
+    :goal as Number?,
+    :color as Graphics.ColorValue?,
+    :backgroundColor as Graphics.ColorValue?,
+    :direction as Graphics.ArcDirection?,
+    :radius as Number?,
+    :position as String?,
+    :arcAngleRage as Number?,
   }) {
     BaseView.initialize();
+    var value = params[:value];
+    var goal = params[:goal];
+    var color = params[:color];
+    var backgroundColor = params[:backgroundColor];
+    var direction = params[:direction];
+    var radius = params[:radius];
+    var position = params[:position];
+    var arcAngleRage = params[:arcAngleRage];
 
-    if (params[:value] != null) {
-      self.value = params[:value];
+    if (value != null) {
+      self.value = value;
     }
-    if (params[:goal] != null) {
-      self.goal = params[:goal];
+    if (goal != null) {
+      self.goal = goal;
     }
-    if (params[:color] != null) {
-      self.color = params[:color];
+    if (color != null) {
+      self.color = color;
     }
-    if (params[:backgroundColor] != null) {
-      self.backgroundColor = params[:backgroundColor];
+    if (backgroundColor != null) {
+      self.backgroundColor = backgroundColor;
     }
-    if (params[:direction] != null) {
-      self.direction = params[:direction];
+    if (direction != null) {
+      self.direction = direction;
     }
-    if (params[:radius] != null) {
-      self.radius = params[:radius];
+    if (radius != null) {
+      self.radius = radius;
     }
-    if (params[:position] != null) {
-      self.position = params[:position];
+    if (position != null) {
+      self.position = position;
     }
-    if (params[:arcAngleRage] != null) {
-      self.arcAngleRage = params[:arcAngleRage];
+    if (arcAngleRage != null) {
+      self.arcAngleRage = arcAngleRage;
     }
   }
 
-  function setRadius(radius as Number) {
+  function setRadius(radius as Number) as Void {
     self.radius = radius;
   }
 
-  function setData(params as { :value as Number, :goal as Number }) {
-    self.value = params[:value];
-    self.goal = params[:goal];
+  function setData(params as { :value as Number, :goal as Number }) as Void {
+    var value = params[:value];
+    var goal = params[:goal];
+
+    if (value != null) {
+      self.value = value;
+    }
+
+    if (goal != null) {
+      self.goal = goal;
+    }
   }
   
-  function draw(dc as Dc) {
+  function draw(dc as Dc) as Void {
     dc.setColor(self.backgroundColor, self.backgroundColor);
     var penWidth = 4;
-    var radius = self.radius - penWidth / 2;
+    var radius = (self.radius - penWidth / 2).toNumber();
     dc.setPenWidth(penWidth);
     var startDegree = self.getStartDegree();
 
@@ -110,7 +126,7 @@ class ArcGoalGraph extends BaseView {
     }
   }
 
-  function getMultiplier() {
+  function getMultiplier() as Number {
     return self.direction == Graphics.ARC_CLOCKWISE ? -1 : 1;
   }
 

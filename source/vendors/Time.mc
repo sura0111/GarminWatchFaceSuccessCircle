@@ -7,16 +7,14 @@ module Keg {
       hour as Lang.Number or Null,
       minute as Lang.Number or Null,
       is24Hour as Lang.Boolean or Null
-    ) {
+    ) as Lang.String {
       if (hour == null || minute == null) {
         return "--:--";
       }
 
-      hour = is24Hour == true || is24Hour == null
-                 ? hour
-                 : (hour > 12 ? hour - 12 : hour);
+      var newHour = (is24Hour == false) ? (hour > 12 ? hour - 12 : hour) : hour;
 
-      return hour.format(hour < 10 ? "%02d" : "%d") + ":" +
+      return newHour.format(newHour < 10 ? "%02d" : "%d") + ":" +
              minute.format(minute < 10 ? "%02d" : "%d");
     }
   }

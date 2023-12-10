@@ -4,36 +4,29 @@ import Toybox.System;
 import Toybox.WatchUi;
 import Toybox.Activity;
 import Toybox.ActivityMonitor;
-import Toybox.Weather;
 import Toybox.Time;
 import Toybox.Position;
 import Toybox.SensorHistory;
 using Toybox.Time.Gregorian as Date;
-using Sura.Weather as SWeather;
-import Keg.Sun;
-using Sura.StringHelper;
+import Sura.Sun;
+import Sura.Device;
+import Sura.BodyBattery;
 
 class MainWatchFace extends WatchUi.WatchFace {
-  var screenWidth as Number = 0;
-  var screenHeight as Number = 0;
+  var offsetX as Number = 20;
+  var topSeparatorY as Number = 0;
+  var bottomSeparatorY as Number = 0;
+
   var stepBar as ArcGoalView;
   var battery as Battery;
   var heartRate as HeartRateView;
   var bodyBatteryBar as ArcGoalView;
-  var lastLocation as Array<Double> or Null = null;
+  var iconDoNotDisturb as WatchUi.Resource;
+  var backgroundImage as WatchUi.Resource or Null = null;
 
   var is24Hour as Boolean = false;
   var isDoNotDisturb as Boolean = false;
-
-  var iconDoNotDisturb as BitmapResource;
-  var backgroundImage as BitmapResource or Null = null;
-  var offsetX = 20;
-  var sun as Sun.SunInfo;
-
-  var topSeparatorY as Number = 0;
-  var bottomSeparatorY as Number = 0;
-  var fontXTinySize = 30;
-  var fontNumberHotSize = 74;
+  var temperatureUnits as System.UnitsSystem or Null = null;
 
   public function initialize() {
     WatchFace.initialize();
@@ -56,92 +49,83 @@ class MainWatchFace extends WatchUi.WatchFace {
     self.heartRate = new HeartRateView();
 
     self.iconDoNotDisturb = WatchUi.loadResource(Rez.Drawables.doNotDisturbIcon);
-    self.sun = new Sun.SunInfo();
   }
 
   // Load your resources here
   public function onLayout(dc as Dc) as Void {
     setLayout(Rez.Layouts.WatchFace(dc));
+    Device.load(dc);
 
-    self.screenWidth = dc.getWidth();
-    self.screenHeight = dc.getHeight();
-    var screenCenterX = self.getCenterX();
-    var screenCenterY = self.getCenterY();
-    self.topSeparatorY = screenCenterY - screenHeight / 8 - 2;
-    self.bottomSeparatorY = screenCenterY + screenHeight / 8 - 2;
+    self.topSeparatorY = Device.screenCenter.x - (Graphics.getFontHeight(Device.timeFontSize) / 2).toNumber();
+    self.bottomSeparatorY = Device.screenCenter.x + (Graphics.getFontHeight(Device.timeFontSize) / 2).toNumber();
 
-    var arcRadius = (self.screenWidth > self.screenHeight ? screenCenterY : screenCenterX) - 8;
+    var arcRadius = Device.screenCenter.getMin() - 8;
 
-    self.stepBar.setPosition({ :x => screenCenterX, :y => screenCenterY });
+    self.stepBar.setPosition(Device.screenCenter.x, Device.screenCenter.x);
     self.stepBar.setRadius(arcRadius);
     self.stepBar.setIcon(WatchUi.loadResource(Rez.Drawables.stepIcon));
 
-    self.bodyBatteryBar.setPosition({ :x => screenCenterX, :y => screenCenterY });
+    self.bodyBatteryBar.setPosition(Device.screenCenter.x, Device.screenCenter.x);
     self.bodyBatteryBar.setRadius(arcRadius);
     self.bodyBatteryBar.setIcon(WatchUi.loadResource(Rez.Drawables.bodyBatteryIcon));
 
-    self.heartRate.setPosition({
-      :x => screenCenterX - 120,
-      :y => self.bottomSeparatorY + 12 + 8
-    });
-
-    self.battery.setPosition({
-      :x => screenCenterX + 38,
-      :y => self.bottomSeparatorY + 12 + 8
-    });
-
-    self.updateLastLocation();
-
-    self.backgroundImage = WatchUi.loadResource(
-      self.isBigScreen() ? Rez.Drawables.backgroundBig : Rez.Drawables.backgroundSmall
+    self.heartRate.setPosition(
+      Device.screenCenter.x - 120,
+      self.bottomSeparatorY + 12 + Graphics.getFontHeight(Graphics.FONT_XTINY) / 2
     );
+
+    self.battery.setPosition(
+      Device.screenCenter.x + 38,
+      self.bottomSeparatorY + 12 + Graphics.getFontHeight(Graphics.FONT_XTINY) / 2
+    );
+
+    self.backgroundImage = Device.isBackgroundImageSupported? WatchUi.loadResource(
+      Device.screenSize.getMin() > 416 ? Rez.Drawables.backgroundBig : Rez.Drawables.backgroundSmall
+    ) : null;
+
   }
 
   // Called when this View is brought to the foreground. Restore
   // the state of this View and prepare it to be shown. This includes
   // loading resources into memory.
   public function onShow() as Void {
-    self.updateLastLocation();
+    Sun.loadLocation();
   }
 
   // Update the view
   public function onUpdate(dc as Dc) as Void {
     // Call the parent onUpdate function to redraw the layout
     View.onUpdate(dc);
+
+    var settings = System.getDeviceSettings();
+    self.is24Hour = settings.is24Hour;
+    self.isDoNotDisturb = settings.doNotDisturb;
+    self.temperatureUnits = settings.temperatureUnits;
+    Sura.Weather.loadCurrentConditions();
     
     if (self.backgroundImage != null) {
       dc.drawBitmap(
-        self.getCenterX() - backgroundImage.getWidth() / 2, 
-        self.getCenterY() - backgroundImage.getHeight() / 2,
+        Device.screenCenter.x - backgroundImage.getWidth() / 2, 
+        Device.screenCenter.y - backgroundImage.getHeight() / 2,
         self.backgroundImage
       );
     }
 
     var clockTime = System.getClockTime();
-    var centerX = self.getCenterX();
-    var centerY = self.getCenterY();
+    var centerX = Device.screenCenter.x;
+    var centerY = Device.screenCenter.y;
 
     /**
      * ------------------------
      * Get Info
      * ------------------------
      */
-    var settings = System.getDeviceSettings();
-    self.is24Hour = settings.is24Hour;
-    self.isDoNotDisturb = settings.doNotDisturb;
     var info = ActivityMonitor.getInfo();
-    var weather = Weather.getCurrentConditions();
     var time = self.getTimeText(clockTime);
     var date = self.getDateText();
     var step = self.getStepText(info);
-    var temperature = self.getTemperatureText(weather);
-    var bodyBattery = self.getBodyBattery();
-
-    var minutesSinceMidnight = clockTime.hour * 60 + clockTime.min;
-    var sunInfo = self.sun.getInfo(self.lastLocation, new Time.Moment(Time.now().value()));
-    var isNight =
-          minutesSinceMidnight < ((sunInfo.sunrise.hour * 60) + sunInfo.sunrise.minute) ||
-          minutesSinceMidnight > ((sunInfo.sunset.hour * 60) + sunInfo.sunset.minute);
+    var bodyBattery = Sura.BodyBattery.getBodyBattery();
+    var isNight = Sun.getIsNight();
 
     /**
      * ------------------------
@@ -172,17 +156,27 @@ class MainWatchFace extends WatchUi.WatchFace {
 
     // Date
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.drawText(centerX, self.topSeparatorY - self.fontXTinySize - 12, Graphics.FONT_XTINY, date, Graphics.TEXT_JUSTIFY_CENTER);
+    dc.drawText(
+      centerX,
+      self.topSeparatorY - Graphics.getFontHeight(Graphics.FONT_XTINY) - 12,
+      Graphics.FONT_XTINY,
+      date,
+      Graphics.TEXT_JUSTIFY_CENTER
+    );
     
     if (self.isDoNotDisturb) {
-      dc.drawBitmap(centerX + - 12, topSeparatorY - 12 - 72, self.iconDoNotDisturb);
+      dc.drawBitmap(
+        centerX - self.iconDoNotDisturb.getWidth() / 2,
+        self.topSeparatorY - Graphics.getFontHeight(Graphics.FONT_XTINY) - 12 - self.iconDoNotDisturb.getHeight() - 6,
+        self.iconDoNotDisturb
+      );
     }
 
     // Time
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.drawText(screenWidth - 45, centerY, Graphics.FONT_NUMBER_HOT, time, Graphics.TEXT_JUSTIFY_VCENTER);
+    dc.drawText(Device.screenSize.x - 45, centerY, Device.timeFontSize, time, Graphics.TEXT_JUSTIFY_VCENTER);
     dc.drawText(
-      screenWidth - 10,
+      Device.screenSize.x - 10,
       centerY,
       Graphics.FONT_XTINY,
       clockTime.sec.format("%02d"),
@@ -191,45 +185,33 @@ class MainWatchFace extends WatchUi.WatchFace {
 
     // Weather
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    var weatherIcon = WatchUi.loadResource(SWeather.getWeatherIcon(weather.condition, isNight));
-    dc.drawBitmap(
-      centerX - 50 - weatherIcon.getWidth(),
-      40 - weatherIcon.getHeight() / 2,
-      WatchUi.loadResource(SWeather.getWeatherIcon(weather.condition, isNight))
+    var weatherIcon = Sura.Weather.getWeatherIcon(isNight);
+    if (weatherIcon != null) {
+      dc.drawBitmap(
+        centerX - 50 - weatherIcon.getWidth(),
+        40 - weatherIcon.getHeight() / 2,
+        weatherIcon
+      );
+    }
+    dc.drawText(
+      centerX - 50,
+      40 - Graphics.getFontHeight(Graphics.FONT_XTINY) / 2,
+      Graphics.FONT_XTINY,
+      Sura.Weather.getTemperatureAndPrecipitationChanceInfo(self.temperatureUnits),
+      Graphics.TEXT_JUSTIFY_LEFT
     );
-    dc.drawText(centerX - 50, 40 - self.fontXTinySize / 2, Graphics.FONT_XTINY, temperature, Graphics.TEXT_JUSTIFY_LEFT);
 
     // Separators
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.setPenWidth(2);
-    dc.drawLine(centerX + offsetX - 150, self.topSeparatorY, centerX + offsetX + 150, self.topSeparatorY);
-    dc.drawLine(centerX + offsetX - 150, self.bottomSeparatorY, centerX + offsetX + 150, self.bottomSeparatorY);
+    dc.drawLine(centerX + offsetX - Device.screenSize.x * 0.38, self.topSeparatorY, centerX + offsetX + Device.screenSize.x * 0.38, self.topSeparatorY);
+    dc.drawLine(centerX + offsetX - Device.screenSize.x * 0.38, self.bottomSeparatorY, centerX + offsetX + Device.screenSize.x * 0.38, self.bottomSeparatorY);
     dc.setPenWidth(1);
 
     self.stepBar.draw(dc);
     self.battery.draw(dc);
     self.heartRate.draw(dc);
     self.bodyBatteryBar.draw(dc);
-  }
-
-  // Called when this View is removed from the screen. Save the
-  // state of this View here. This includes freeing resources from
-  // memory.
-  public function onHide() as Void {}
-
-  // The user has just looked at their watch. Timers and animations may be
-  // started here.
-  public function onExitSleep() as Void {}
-
-  // Terminate any active timers and prepare for slow updates.
-  public function onEnterSleep() as Void {}
-
-  private function getCenterX() {
-    return self.screenWidth / 2;
-  }
-
-  private function getCenterY() {
-    return self.screenHeight / 2;
   }
 
   private function getTimeText(clockTime as System.ClockTime) as String {
@@ -249,55 +231,24 @@ class MainWatchFace extends WatchUi.WatchFace {
   }
 
   private function getStepText(info as ActivityMonitor.Info) as String {
-    return Lang.format("$1$/$2$", [info.steps, info.stepGoal]);
-  }
-
-  private function getTemperatureText(currentCondition as Weather.CurrentConditions or Null) as String {
-    if (currentCondition == null) {
-      return "--";
-    }
-    var temperature = StringHelper.padStart(currentCondition.temperature.format("%d"), 2, " ") + "°C";
-    var precipitationChance = StringHelper.padStart(currentCondition.precipitationChance.format("%d"), 2, " ") + "%";
-    return temperature + "/" + precipitationChance;
-  }
-
-  private function getBodyBatteryHistoryIterator() as SensorHistory.SensorHistoryIterator or Null {
-    if ((Toybox has :SensorHistory) && (Toybox.SensorHistory has :getBodyBatteryHistory)) {
-        // Set up the method with parameters
-        return Toybox.SensorHistory.getBodyBatteryHistory({ :period => 1 });
-    }
-    return null;
-  }
-
-  private function getBodyBattery() as Number {
-    var bodyBatteryHistory = self.getBodyBatteryHistoryIterator();
-    if (bodyBatteryHistory == null) {
-      return 0;
-    }
-
-    var bodyBatterySample = bodyBatteryHistory.next();
+    var stepText = Lang.format("$1$/$2$", [info.steps, info.stepGoal]);
     
-    if (bodyBatterySample == null) {
-      return 0;
+    if (stepText.length() >= 10) {
+      return info.steps.format("%d");
     }
 
-    var bodyBatteryData = bodyBatterySample.data;
-
-    if (bodyBatteryData != null) {
-      return bodyBatteryData;
-    }
-
-    return 0;
+    return stepText;
   }
 
-  private function updateLastLocation() {
-    var position = Position.getInfo();
-    if (position.accuracy != Position.QUALITY_NOT_AVAILABLE) {
-      self.lastLocation = position.position.toRadians();
-    }
-  }
+  // // Called when this View is removed from the screen. Save the
+  // // state of this View here. This includes freeing resources from
+  // // memory.
+  // public function onHide() as Void {}
 
-  private function isBigScreen() {
-    return self.screenWidth > 416 || self.screenHeight > 416;
-  }
+  // // The user has just looked at their watch. Timers and animations may be
+  // // started here.
+  // public function onExitSleep() as Void {}
+
+  // // Terminate any active timers and prepare for slow updates.
+  // public function onEnterSleep() as Void {}
 }

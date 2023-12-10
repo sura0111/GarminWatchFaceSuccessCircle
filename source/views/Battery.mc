@@ -12,11 +12,11 @@ class Battery extends BaseView {
   var fullBatteryColor as Number;
 
   function initialize(params as {
-    :width as Number or Null,
-    :height as Number or Null,
-    :primaryColor as Number or Null,
-    :lowBatteryColor as Number or Null,
-    :fullBatteryColor as Number or Null
+    :width as Number?,
+    :height as Number?,
+    :primaryColor as Number?,
+    :lowBatteryColor as Number?,
+    :fullBatteryColor as Number?
   }) {
     BaseView.initialize();
     self.width = params[:width] == null ? 24 : params[:width];
@@ -32,30 +32,29 @@ class Battery extends BaseView {
     var batteryHeadWidth = self.width / 10;
     var batteryHeadHeight = self.height / 2;
     var batteryHeadX = self.x + self.width;
-    var batteryHeadY = self.y + (self.height - batteryHeadHeight) / 2;
-    var fontSizeOffset = 8;
+    var batteryHeadY = self.y - batteryHeadHeight / 2;
 
     // battery
     dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-    dc.fillRectangle(self.x, self.y - fontSizeOffset + 1, (self.width * battery / 100), self.height);
+    dc.fillRectangle(self.x, self.y - self.height / 2, (self.width * battery / 100), self.height);
 
     // frame
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.drawRectangle(self.x, self.y - fontSizeOffset + 1, self.width, self.height);
+    dc.drawRectangle(self.x, self.y - self.height / 2, self.width, self.height);
 
     // batteryHead
     if(battery == 100.0) {
         dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(batteryHeadX,  batteryHeadY - fontSizeOffset + 1,  batteryHeadWidth, batteryHeadHeight);
+        dc.fillRectangle(batteryHeadX,  batteryHeadY,  batteryHeadWidth, batteryHeadHeight);
     }
 
     // BatteryHead Frame
     dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-    dc.drawRectangle(batteryHeadX, batteryHeadY - fontSizeOffset + 1, batteryHeadWidth, batteryHeadHeight);
+    dc.drawRectangle(batteryHeadX, batteryHeadY, batteryHeadWidth, batteryHeadHeight);
 
     dc.drawText(
       batteryHeadX + batteryHeadWidth + 2,
-      self.y - fontSizeOffset * 2,
+      self.y - Graphics.getFontHeight(Graphics.FONT_XTINY) / 2,
       Graphics.FONT_XTINY,
       StringHelper.padStart(battery.format("%d") + "%", 4, " "),
       Graphics.TEXT_JUSTIFY_LEFT

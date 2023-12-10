@@ -10,21 +10,21 @@ using Keg.Time;
 module Keg {
 	module Sun {
 		class SunNextEventInfo {
-			public var minutes = 0;
-			public var hours = 0;
-			public var event = :sunrise;
+			public var minutes as Lang.Number = 0;
+			public var hours as Lang.Number = 0;
+			public var event as Lang.Symbol = :sunrise;
 
-			public function asString() {
+			public function asString() as Lang.String {
 				return self.hours + "h " + self.minutes + "m";
 			}
 		}
 
 		class SunEventInfo {
-			public var minute = 0;
-			public var hour = 0;
-			public var degree = 0;
+			public var minute as Lang.Number = 0;
+			public var hour as Lang.Number = 0;
+			public var degree as Lang.Number = 0;
 
-			public function asString(is24Hour as Lang.Boolean or Null) {
+			public function asString(is24Hour as Lang.Boolean or Null) as Lang.String {
 				return Time.format(self.hour, self.minute, is24Hour);
 			}
 		}
@@ -33,7 +33,7 @@ module Keg {
 			public var nextEvent as Sun.SunNextEventInfo;
 			public var sunrise as Sun.SunEventInfo;
 			public var sunset as Sun.SunEventInfo;
-			public var tomorrow = Sun.SunEventInfo;
+			public var tomorrow as Sun.SunEventInfo;
       
       function initialize() {
         self.nextEvent = new Sun.SunNextEventInfo();
@@ -42,7 +42,7 @@ module Keg {
         self.tomorrow = new SunEventInfo();
       }
 
-      function getInfo(position as Lang.Array<Lang.Double> or Null, moment as T.Moment) {
+      function getInfo(position as Lang.Array<Lang.Double> or Null, moment as T.Moment) as SunInfo {
         if (position == null) {
           return self;
         }

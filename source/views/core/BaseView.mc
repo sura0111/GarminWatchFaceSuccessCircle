@@ -11,8 +11,8 @@ class BaseView extends WatchUi.View {
     View.initialize();
   }
 
-  public function setPosition(params as { :x as Number, :y as Number }) as Void {
-    self.x = params[:x];
-    self.y = params[:y];
+  public function setPosition(x as Number, y as Number) as Void {
+    self.x = x;
+    self.y = y;
   }
 }
