@@ -20,6 +20,7 @@ class MainWatchFace extends WatchUi.WatchFace {
   var bodyBatteryGraph as ArcGoalView;
   var heartRate as HeartRateView;
   var iconDoNotDisturb as WatchUi.Resource = WatchUi.loadResource(Rez.Drawables.doNotDisturbIcon);
+  var iconMessageBadge as WatchUi.Resource = WatchUi.loadResource(Rez.Drawables.messageBadgeCustom);
   var isDoNotDisturb as Boolean = false;
   var isLowPowerMode = false;
   var offsetX as Number = 50;
@@ -114,12 +115,20 @@ class MainWatchFace extends WatchUi.WatchFace {
     self.battery.draw(dc);
     self.heartRate.draw(dc);
 
-    if (self.isDoNotDisturb && !Device.isSmallScreen) {
-      dc.drawBitmap(
-        Device.screenCenter.x - self.iconDoNotDisturb.getWidth() / 2,
-        self.separatorYTop - smallFontSize - 12 - self.iconDoNotDisturb.getHeight() - 6,
-        self.iconDoNotDisturb
-      );
+    if (!Device.isSmallScreen) {
+      if (self.isDoNotDisturb) {
+        dc.drawBitmap(
+          Device.screenCenter.x - self.iconDoNotDisturb.getWidth() / 2,
+          self.separatorYTop - smallFontSize - 12 - self.iconDoNotDisturb.getHeight() - 6,
+          self.iconDoNotDisturb
+        );
+      } else if (settings.notificationCount > 0) {
+        dc.drawBitmap(
+          Device.screenCenter.x - self.iconMessageBadge.getWidth() / 2,
+          self.separatorYTop - smallFontSize - 12 - self.iconMessageBadge.getHeight() - 6,
+          self.iconMessageBadge
+        );
+      }
     }
 
     // Separators
@@ -197,7 +206,6 @@ class MainWatchFace extends WatchUi.WatchFace {
       Datetime.getDateText(),
       textAlign
     );
-
   }
 
   function getTimeFontSize() as Graphics.FontDefinition {
@@ -238,7 +246,7 @@ class MainWatchFace extends WatchUi.WatchFace {
       textAlign
     );
 
-    if (!self.isLowPowerMode) {
+    if (!self.isLowPowerMode && !store.shouldHideSecond) {
       // Seconds
       dc.drawText(
         Device.screenSize.x - 10,

@@ -32,6 +32,8 @@
     <bitmap id="weatherTornadoIcon" filename="30/weather-tornado-custom.png" />
     <bitmap id="weatherWindyIcon" filename="30/weather-windy-custom.png" />
     <bitmap id="weatherWindyVariantIcon" filename="30/weather-windy-variant-custom.png" />
+    <bitmap id="messageBadgeCustom" filename="30/message-badge-custom.png" />
+
     <bitmap id="backgroundBig" filename="454/background3.jpg" />
     <bitmap id="backgroundSmall" filename="416/background3.jpg" />
 </drawables>
