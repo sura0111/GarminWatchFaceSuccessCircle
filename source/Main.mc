@@ -6,6 +6,7 @@ import Toybox.Activity;
 import Toybox.Time;
 import Toybox.Position;
 import Toybox.SensorHistory;
+import Toybox.Application.Properties;
 using Toybox.Time.Gregorian as Date;
 import Sura.Sun;
 import Sura.Device;
@@ -85,6 +86,8 @@ class MainWatchFace extends WatchUi.WatchFace {
     self.backgroundImage = Device.isBackgroundImageSupported? WatchUi.loadResource(
       Device.screenSize.getMin() > 416 ? Rez.Drawables.backgroundBig : Rez.Drawables.backgroundSmall
     ) : null;
+
+    store.canDisplaySecond = Application.Properties.getValue(storeName.canDisplaySecond);
   }
 
   // Called when this View is brought to the foreground. Restore
@@ -246,7 +249,7 @@ class MainWatchFace extends WatchUi.WatchFace {
       textAlign
     );
 
-    if (!self.isLowPowerMode && !store.shouldHideSecond) {
+    if (!self.isLowPowerMode && store.canDisplaySecond) {
       // Seconds
       dc.drawText(
         Device.screenSize.x - 10,
